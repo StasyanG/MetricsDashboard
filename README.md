@@ -22,7 +22,9 @@ Vue.js application is created using [vue-webpack-boilerplate](https://github.com
 For the web application to function correctly it is needed to replace server address (API_URL) in the following configuration files: _app/config/dev.env.js_ and _app/config/prod.env.js_.
 ### server/data
 To be able to get data from Yandex.Metrika counters you should create a file server/data/counters.txt and fill it with counter information (one line per counter):
+```
 <WEBSITE NAME> Yandex <COUNTER_ID> <API_TOKEN>
+```
 ### Installation and start
 To install and start server and web application use the following commands:
 ```

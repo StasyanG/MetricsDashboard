@@ -101,6 +101,7 @@ export default {
         process.env.API_URL+"/api/data?name="+this.$route.params.name+"&type="+this.$route.params.type
         +"&date1="+moment(this.interval.date1).format('YYYY-MM-DD')
         +'&date2='+moment(this.interval.date2).format('YYYY-MM-DD')
+        +'&gran='+this.interval.granularity
       )
       .then(response => {
         var resData = response.data.data;
@@ -215,7 +216,7 @@ export default {
                     }
                   ]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { responsive: true, maintainAspectRatio: false, animation: false }
               });
             }
           });
@@ -232,7 +233,7 @@ export default {
                 }
               ]
             },
-            options: {responsive: true, maintainAspectRatio: false}
+            options: { responsive: true, maintainAspectRatio: false, animation: false }
           });
         }
       });
@@ -248,8 +249,12 @@ export default {
       var d2 = moment(this.interval.date2).startOf('day').toDate();
       var d2end = moment(d2).endOf('week').startOf('day').toDate();
 
-      var beginSlice = moment(d1).diff(moment(d1start), 'days');
-      var endSlice = moment(d2).diff(moment(d2end), 'days');
+      var beginSlice = 0;
+      var endSlice = 0;
+      if(this.interval.granularity == 'days') {
+        var beginSlice = moment(d1).diff(moment(d1start), 'days');
+        var endSlice = moment(d2).diff(moment(d2end), 'days');
+      }
 
       dataCh.forEach(function(chart, i, charts) {
         var labels = chart.chartData.labels;

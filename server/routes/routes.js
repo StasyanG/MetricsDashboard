@@ -44,6 +44,7 @@ module.exports = function (app) {
         var type = req.query.type;
         var date1 = req.query.date1;
         var date2 = req.query.date2;
+        var granularity = req.query.gran || 'days';
         if(!name || !type || !date1 || !date2) {
             return res.send({
                 status: 'ERROR',
@@ -77,7 +78,7 @@ module.exports = function (app) {
             resultData = resultData.concat(data);
             return res.send({ 
                 status: 'OK', 
-                data: helpers.generateGraphData(resultData, "days")
+                data: helpers.generateGraphData(resultData, granularity)
             });
         })
         .catch(function(err) {

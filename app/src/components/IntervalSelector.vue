@@ -7,6 +7,12 @@
         <div class="intervalSelector__datepick">
             <datepicker :format="format" v-model="interval.date2" id="datepicker2" placeholder="Конец интервала"></datepicker>
         </div>
+        <div class="intervalSelector__granularity">
+            <select v-model="interval.granularity">
+                <option value="days">Дни</option>
+                <option value="weeks">Недели</option>
+            </select>
+        </div>
     </div>
 </template>
 
@@ -42,6 +48,9 @@ export default {
     padding: 10px;
 }
 .intervalSelector__btnGetData {
+    display: inline-block;
+}
+.intervalSelector__granularity {
     display: inline-block;
 }
 </style>

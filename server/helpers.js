@@ -26,49 +26,54 @@ module.exports = {
             return item.timestamp > saved.timestamp ? item : saved;
         }, data[0]).timestamp;
         date2 = moment(date2).endOf("week");
-        var diff = date2.diff(date1, 'days');
+        var diff = date2.diff(date1, granularity);
         for(var i = 0; i <= diff; i++) {
-            labels.push(moment(date1).add(i, "days").format("YYYY-MM-DD"));
+            labels.push(moment(date1).add(i, granularity).format("YYYY-MM-DD"));
         }
 
         // Determine number of samples based on number
         // of labels and granularity (days, weeks, month)
         // of representation
-        var numOfSamples = 0;
-        switch(granularity) {
-            case 'days':
-                numOfSamples = labels.length;
-                break;
-            case 'weeks':
-                numOfSamples = labels.length/7;
-            default:
-                return [];
-        }
+        var numOfSamples = labels.length;
 
         // Generate graph data
         var graphData = [];
         data.forEach(function(week, i, weeks) {
             var weekIndex = moment(week.timestamp).diff(date1, 'weeks');
 
-            var label = week['metric']+' - '+week['dimension']
-                      +(week['filters'] && week['filters'] != '' ? ' ('+weeks['filters']+')' : '');
+            var graphLabel = week['metric']+' - '+week['dimension']
+                           + (week['filters'] && week['filters'] != '' ? ' ('+weeks['filters']+')' : '');
             var index = null;
             graphData.forEach(function(graph, k, data) {
-                if(graph.label == label) {
+                if(graph.label == graphLabel) {
                     index = k;
                     return;
                 }
             });
             if(index == null) {
                 var newGraph = {
-                    label: label,
+                    label: graphLabel,
                     data: Array.apply(null, new Array(numOfSamples)).map(Number.prototype.valueOf,0)
                 }
                 index = graphData.push(newGraph) - 1;
             }
-            week['values'].forEach(function(valueObj, j, values) {
-                graphData[index]['data'][weekIndex*7 + valueObj.dayOfWeek] = valueObj.value;
-            });
+            switch(granularity) {
+                case 'days':
+                    week['values'].forEach(function(valueObj, j, values) {
+                        graphData[index]['data'][weekIndex*7 + valueObj.dayOfWeek] = valueObj.value;
+                    });
+                    break;
+                case 'weeks':
+                    var weekSum = 0.0;
+                    week['values'].forEach(function(valueObj, j, values) {
+                        weekSum += valueObj.value;
+                    });
+                    graphData[index]['data'][weekIndex] = weekSum;
+                default:
+                    week['values'].forEach(function(valueObj, j, values) {
+                        graphData[index]['data'][weekIndex*7 + valueObj.dayOfWeek] = valueObj.value;
+                    });
+            }
         });
         return {
             'labels': labels,

@@ -23,7 +23,8 @@ export default {
     return {
       interval: {
         date1: moment().subtract(7, "days").format('YYYY-MM-DD'),
-        date2: moment().format('YYYY-MM-DD')
+        date2: moment().format('YYYY-MM-DD'),
+        granularity: 'days'
       },
       graphsLayout: '1'
     }

@@ -2,3 +2,4 @@ server/data
 !server/data/counters.txt
 */node_modules
 prod.*
+*.log

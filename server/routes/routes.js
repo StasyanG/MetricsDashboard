@@ -34,10 +34,11 @@ module.exports = function (app) {
         get.get_all(res);
     });
     app.get('/api/get/:date1/:date2', function(req, res, next) {
-        get.get_all_interval(res, req.params.date1, req.params.date2);
+        get.get_data(res, req.params.date1, req.params.date2);
     });
-    app.get('/api/get/:name/:type/:date1/:date2', function(req, res, next) {
-        get.get_one(res, req.params.name, req.params.type, req.params.date1, req.params.date2);
+    app.get('/api/get/:date1/:date2/:name/:type', function(req, res, next) {
+        get.get_data(res, req.params.date1, req.params.date2, 
+            req.params.name, req.params.type);
     });
     app.get('/api/data', function(req, res, next) {
         var name = req.query.name;

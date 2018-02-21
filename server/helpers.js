@@ -116,5 +116,12 @@ module.exports = {
             chunks.push(arr.slice(i, i + chunkSize));
         }
         return chunks;
+    },
+    delay: function(ms) {
+        var thisHelpers = this;
+        return new Promise(function(resolve, reject) {
+            thisHelpers.logger('helpers.delay', (ms/1000));
+            setTimeout(resolve, ms);
+        });
     }
 }

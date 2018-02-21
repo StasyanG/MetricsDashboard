@@ -1,8 +1,8 @@
 var moment = require('moment');
 moment.locale('ru');
 
-var helpers = require('../helpers');
-var MetricsWeekModel = require('../models/metric_week').MetricsWeekModel;
+const helpers = require('../helpers');
+const MetricsWeekModel = require('../models/metric_week').MetricsWeekModel;
 
 class YaMetrics {
   constructor(cid, cname, api_token) {
@@ -37,16 +37,12 @@ class YaMetrics {
       .then(function(response) {
         helpers.logger('YaMetrics.get_metrics', 'Response is good');
         thisYaMetrics._data_raw = response;
-        //var weekObjects = thisYaMetrics._create_weekObjects(metrics, filters);
         thisYaMetrics._create_updates_for_week_objects(metrics, filters);
         return thisYaMetrics._update_week_objects();
       })
       .then(function(counted) {
         helpers.logger('YaMetrics.get_metrics', 'Updated ' + counted + ' week objects');
-
-        var sec = 1;
-        helpers.logger('YaMetrics.get_metrics', 'Waiting ' + sec + ' seconds');
-        setTimeout(resolve, sec*1000, counted);
+        resolve(counted);
       })
       .catch(function(error) {
         reject(error);

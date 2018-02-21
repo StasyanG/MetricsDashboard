@@ -5,7 +5,7 @@ moment.locale('ru');
 
 var MetricsWeekModel = require('./models/metric_week').MetricsWeekModel;
 
-var helpers = require('./helpers');
+const helpers = require('./helpers');
 const YaMetrics = require('./classes/YaMetrics.js');
 
 function get_counter_list() {
@@ -35,32 +35,45 @@ function get_counter_list() {
     });
 }
 
-function get_yandex(name, id, api_token, date1, date2, group) {
+function get_yandex(name, id, api_token, date1, date2, group, dataSets=null) {
     
     return new Promise(function(resolve, reject) {
         var yaMetrics = new YaMetrics(id, name, api_token);
-        var count = 0;
+        var dataCounter = 0;
 
-        yaMetrics.get_metrics(date1, date2, group,
-            ['ym:s:visits'], ['ym:s:isNewUser'])
-        .then(function(counted) {
-            count += counted;
-            return yaMetrics.get_metrics(date1, date2, group,
-                ['ym:s:visits'], ['ym:s:firstTrafficSource']);
-        })
-        .then(function(counted) {
-            count += counted;
-            return yaMetrics.get_metrics(date1, date2, group,
-                ['ym:s:pageDepth', 'ym:s:avgVisitDurationSeconds'], [])
-        })
-        .then(function(counted) {
-            count += counted;
-            resolve(count);
-        })
-        .catch(function(error) {
-            helpers.logger('get.get_yandex', 'ERROR occured!\n' + error);
-            reject(error);
-        });
+        var toGet = [
+            {metrics: ['ym:s:visits'], dimensions: ['ym:s:isNewUser']},
+            {metrics: ['ym:s:visits'], dimensions: ['ym:s:firstTrafficSource']},
+            {metrics: ['ym:s:pageDepth', 'ym:s:avgVisitDurationSeconds'], dimensions: []}
+        ];
+        if(dataSets) {
+            toGet = dataSets;
+        }
+
+        var numOfDatasets = toGet.length;
+        var nCount = 0;
+        var promises = [];
+
+        toGet.reduce(function(promise, dataset) {
+            return promise.then(function(result) {
+                return Promise.all([
+                    yaMetrics.get_metrics(date1, date2, group, 
+                        dataset.metrics, dataset.dimensions)
+                    .then(function(counted) {
+                        dataCounter += counted;
+                        nCount++;
+                        if(nCount == numOfDatasets) {
+                            resolve(dataCounter);
+                        }
+                    })
+                    .catch(function(error) {
+                        helpers.logger('get.get_yandex', 'ERROR occured!\n' + error);
+                        reject(error);
+                    }),
+                    helpers.delay(1000)
+                ]);
+            })
+        }, Promise.resolve())
     });
 
 }
@@ -87,63 +100,42 @@ module.exports = {
         });
 
     },
-    get_all_interval: function(res, date1, date2) {
+    get_data: function(res, date1, date2, name=null, type=null, dataSets=null) {
 
         date1 = moment(date1).startOf("day");
         var date1Str = date1.format('YYYY-MM-DD');
         date2 = moment(date2).startOf("day");
         var date2Str = date2.format('YYYY-MM-DD');
 
-        get_counter_list()
-        .then(function(counters) {
-            counters.forEach(function(cnt, i, counters) {
-                if(cnt.type == 'Yandex') {
-                    get_yandex(cnt.name, cnt.id, cnt.token, date1Str, date2Str, 'day');
-                }
-            });
-            res.send({
-                status: 'OK',
-                data: 'Getting Metrics Data...'
-            });
-        })
-        .catch(function(err) {
-            console.error(err);
-            res.send({
-                status: 'ERROR',
-                msg: err
-            });
-        });
-
-    },
-    get_one: function(res, name, type, date1, date2) {
-
-        date1 = moment(date1).startOf("day");
-        var date1Str = date1.format('YYYY-MM-DD');
-        date2 = moment(date2).startOf("day");
-        var date2Str = date2.format('YYYY-MM-DD');
-
-        helpers.logger('get.get_one', date1Str + ' ' + date2Str);
+        helpers.logger('get.get_data', date1Str + ' ' + date2Str);
 
         get_counter_list()
         .then(function(counters) {
-            var found = counters.filter(function(item) {
-                return item.name == name && item.type == type;
-            });
-            if(!found.length) {
-                res.send({
-                    status: 'ERROR',
-                    msg: 'Counter not found'
+            var found = counters;
+            if(name && type) {
+                found = counters.filter(function(item) {
+                    return item.name == name && item.type == type;
                 });
-            } else {
-                var cnt = found[0];
-                helpers.logger('get.get_one', cnt.name + ' ' + cnt.type + ' ' + cnt.id);
+            }
+            var numOfCounters = found.length;
+            var nCount = 0;
+            found.forEach(function(cnt, i, counters) {
+                helpers.logger('get.get_data', 'Start processing of '
+                    + cnt.name + ' ' + cnt.type + ' ' + cnt.id);
+                
                 if(cnt.type == 'Yandex') {
-                    get_yandex(cnt.name, cnt.id, cnt.token, date1Str, date2Str, 'day')
+                    get_yandex(cnt.name, cnt.id, cnt.token, date1Str, date2Str, 'day', dataSets)
                     .then(function(counted) {
-                        res.send({
-                            status: 'OK',
-                            data: 'Got Metrics data for Yandex#' + cnt.id + ' (' + counted + ')'
-                        });
+                        nCount++;
+                        helpers.logger('get.get_data', 'End processing of '
+                            + cnt.name + ' ' + cnt.type + ' ' + cnt.id
+                            + ' (' + nCount + '/' + numOfCounters + ')');
+                        if(nCount == numOfCounters) {
+                            res.send({
+                                status: 'OK',
+                                data: 'Got Metrics data'
+                            });
+                        }
                     })
                     .catch(function(err) {
                         res.send({
@@ -152,7 +144,7 @@ module.exports = {
                         });
                     });
                 }
-            }
+            });
         })
         .catch(function(err) {
             console.error(err);

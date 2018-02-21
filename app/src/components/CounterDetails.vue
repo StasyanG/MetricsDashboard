@@ -83,10 +83,10 @@ export default {
       this.msg = 'Пожалуйста, подождите...';
       axios.get(
         process.env.API_URL+"/api/get"
-        +'/'+this.$route.params.name
-        +'/'+this.$route.params.type
         +'/'+moment(this.interval.date1).format('YYYY-MM-DD')
         +'/'+moment(this.interval.date2).format('YYYY-MM-DD')
+        +'/'+this.$route.params.name
+        +'/'+this.$route.params.type
       )
       .then(response => {
         this.msg = '';

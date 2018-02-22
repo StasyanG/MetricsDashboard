@@ -48,7 +48,7 @@ export default {
     "counter_name counter_table"
     "counter_typeid counter_table";
     padding: 10px;
-    margin: 10px;
+    margin: 10px 0 10px 0;
 }
 .counterList__item__name {
     grid-area: counter_name

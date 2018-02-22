@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h1>Metrics Dashboard</h1>
+    <h1 class="site-title">Metrics Dashboard</h1>
     <Navigation></Navigation>
     <IntervalSelector v-on:intervalChange="handleIntervalChange" :interval="interval"></IntervalSelector>
     <router-view :interval="interval" 
@@ -41,12 +41,15 @@ export default {
 </script>
 
 <style>
+@import './assets/css/fontawesome-all.css';
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+.site-title {
+  text-align: center;
 }
 </style>

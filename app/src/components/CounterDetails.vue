@@ -1,27 +1,44 @@
 <template>
     <div class="counterDetails">
-      <p>
-        {{$route.params.name}} {{$route.params.type}}<br />
-        <input type="button" value="Request data" v-on:click="requestData" />
-      </p>
-      <p>
-        Загрузка CSV: <input type="file" @change="onFileChange"/>
-        <input type="submit" value="Отправить" v-on:click="uploadFile"/>
-      </p>
+      <div class="counterDetails__info">
+        <div class="counterDetails__info__name">
+          {{$route.params.name}}
+        </div>
+        <div class="counterDetails__info__type">
+          {{$route.params.type}}
+        </div>
+        <div class="counterDetails__info__controls">
+          <div class="counterDetails__info__controls__control">
+            <input type="button" value="Request data" v-on:click="requestData" />
+          </div>
+          <div class="counterDetails__info__controls__control">
+            Загрузка CSV: <input type="file" @change="onFileChange"/>
+            <input type="submit" value="Отправить" v-on:click="uploadFile"/>
+          </div>
+        </div>
+      </div>
       <p style="background-color: #ccc;">
         {{msg}}
       </p>
       <div class="controls" v-if="dataCharts.length">
-        <p>Показать/скрыть графики</p>
-        <label v-for="(graphObj,index) in dataCharts" :key="index">
-          <input type="checkbox" v-model="graphObj.enabled" /> {{graphObj.groupName}}
-        </label>
-        <p>Кол-во графиков в строке</p>
-        <p class="controls__layout">
-          1: <input name="layout" type="radio" value="1" v-model="layout">
-          2: <input name="layout" type="radio" value="2" v-model="layout">
-          3: <input name="layout" type="radio" value="3" v-model="layout">
-        </p>
+        <div class="controls__graphSelect">
+          <div class="selectBox" v-on:click="showGraphSelBox">
+            <select>
+              <option>Показать/скрыть графики</option>
+            </select>
+            <div class="overSelect"></div>
+          </div>
+          <div id="graphCheckboxes" v-bind:style="'display: ' + (isGraphSelBoxShown ? 'block' : 'none')">
+            <label v-for="(graphObj,index) in dataCharts" :key="index">
+              <input type="checkbox" v-model="graphObj.enabled" />{{graphObj.groupName}}
+            </label>
+          </div>
+        </div>
+        <div class="controls__layout">
+          <input name="layout" type="radio" value="1" v-model="layout" />
+          <input name="layout" type="radio" value="2" v-model="layout" />
+          <input name="layout" type="radio" value="3" v-model="layout" />
+        </div>
       </div>
       <div v-bind:class="graphsLayoutClass">
         <div v-for="(graphObj,index) in dataCharts" :key="index">
@@ -53,7 +70,8 @@ export default {
       msg: '',
       filesToUpload: [],
       dataCharts: [],
-      layout: this.graphsLayout
+      layout: this.graphsLayout,
+      isGraphSelBoxShown: false
     }
   },
   computed: {
@@ -313,6 +331,9 @@ export default {
     toggleChart(index) {
       this.dataCharts[index].enabled = !this.dataCharts[index].enabled;
     },
+    showGraphSelBox() {
+      this.isGraphSelBoxShown = !this.isGraphSelBoxShown;
+    },
     _procResponse(func, response) {
       if(response.status != 200) {
         console.log(func + ': ' + response.status);
@@ -332,6 +353,37 @@ export default {
 </script>
 
 <style scoped>
+.counterDetails__info {
+  border: 1px solid #ccc;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 1fr 7fr;
+  grid-template-areas: 
+  "counter_name counter_controls"
+  "counter_type counter_controls";
+  padding: 10px;
+}
+.counterDetails__info__name {
+  font-weight: bold;
+  grid-area: counter_name;
+}
+.counterDetails__info__type {
+  color: #888;
+  grid-area: counter_type;
+}
+.counterDetails__info__controls {
+  grid-area: counter_controls;
+  align-self: center;
+}
+.counterDetails__info__controls__control {
+  border: 1px solid #ccc;
+  display: inline-block;
+  padding: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+
 .graphsWrapper {
   display: grid;
   grid-template-rows: auto;
@@ -345,14 +397,83 @@ export default {
 .grid-3 {
   grid-template-columns: 33% 33% 33%;
 }
-.controls .controls__layout p {
-  display: inline;
-}
 .graphContainer, .controls {
-  border-top: 1px solid #ccc;
   padding: 0.2em;
 }
 .graphContainer {
+  border-top: 1px solid #ccc;
   padding: 1em;
+  text-align: center;
+}
+
+.controls {
+  text-align: right;
+}
+.controls__layout {
+  display: inline-block;
+}
+.controls__layout input[type=radio] {
+  visibility: hidden;
+}
+.controls__layout input[type=radio]::before {
+  cursor: pointer;
+  visibility: visible;
+
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+}
+.controls__layout input[type=radio][value="1"]::before{
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  content: "\F0C8";
+}
+.controls__layout input[type=radio][value="2"]::before{
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  content: "\F009";
+}
+.controls__layout input[type=radio][value="3"]::before{
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  content: "\F00A";
+}
+
+.controls__graphSelect {
+  display: inline-block;
+  position: relative;
+  width: 300px;
+}
+.controls__graphSelect .selectBox {
+  position: relative;
+}
+.controls__graphSelect .selectBox select {
+  width: 100%;
+  font-weight: bold;
+}
+.controls__graphSelect .selectBox .overSelect {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+#graphCheckboxes {
+  display: none;
+  background-color: #fff;
+  border: 1px #dadada solid;
+  position: absolute;
+  text-align: left;
+  width: 298px;
+}
+#graphCheckboxes label {
+  display: block;
+}
+#graphCheckboxes label:hover {
+  background-color: #ccc;
 }
 </style>

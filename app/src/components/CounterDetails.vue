@@ -98,7 +98,7 @@ export default {
   },
   methods: {
     requestData: function() {
-      this.msg = 'Пожалуйста, подождите...';
+      this.msg = 'Запрашиваю данные...';
       axios.get(
         process.env.API_URL+"/api/get"
         +'/'+moment(this.interval.date1).format('YYYY-MM-DD')
@@ -113,6 +113,7 @@ export default {
       .catch(err => {console.log(err)})
     },
     getData: function() {
+      this.msg = 'Загружаю данные...';
       this.dataCharts = [];
       var dataCh = this.dataCharts;
       axios.get(
@@ -122,23 +123,27 @@ export default {
         +'&gran='+this.interval.granularity
       )
       .then(response => {
+        this.msg = '';
         var resData = response.data.data;
         this.processChartsData(resData);
       })
       .catch(err => {console.log(err)})
     },
     processChartsData: function(data) {
+      this.msg = 'Загружаю графики...';
+
       if(!data.data) {
         return;
       }
       var dataCh = this.dataCharts;
+      var transparent = 'rgba(255, 255, 255, 0.0)';
       var grouping = [
         {
           index: 0,
           name: 'Посещаемость',
           labels: ['Визиты - Новые посетители', 'Визиты - Вернувшиеся посетители'],
-          colors: ['rgba(196, 93, 105, 1.0)', 'rgba(32, 162, 219, 1.0)'],
-          bgColors: ['rgba(196, 93, 105, 0.0)', 'rgba(32, 162, 219, 0.0)']
+          colors: ['rgba(0, 63, 92, 1)', 'rgba(255, 166, 0, 1)'],
+          bgColors: [transparent, transparent]
         },
         {
           index: 1,
@@ -150,52 +155,52 @@ export default {
             'Визиты - Переходы по ссылкам на сайтах'
           ],
           colors: [
-            'rgba(196, 93, 105, 1.0)', 'rgba(32, 162, 219, 1.0)',
-            'rgba(109, 37, 111, 1.0)', 'rgba(151, 50, 82, 1.0)',
-            'rgba(99, 152, 51, 1.0)', 'rgba(170, 108, 57, 1.0)',
-            'rgba(255, 252, 29, 1.0)'
+            'rgba(0, 63, 92, 1)', 'rgba(255, 166, 0, 1)',
+            'rgba(47, 75, 124, 1)', 'rgba(255, 124, 67, 1)',
+            'rgba(102, 81, 145, 1)', 'rgba(249, 93, 106, 1)',
+            'rgba(160, 81, 149, 1)'
             ],
           bgColors: [
-            'rgba(196, 93, 105, 0.0)', 'rgba(32, 162, 219, 0.0)',
-            'rgba(109, 37, 111, 0.0)', 'rgba(151, 50, 82, 0.0)',
-            'rgba(99, 152, 51, 0.0)', 'rgba(170, 108, 57, 0.0)',
-            'rgba(255, 252, 29, 0.0)'
+            transparent, transparent,
+            transparent, transparent,
+            transparent, transparent,
+            transparent
             ]
         },
         {
           index: 2,
           name: 'Время на сайте',
           labels: ['Ср. время (сек) - Итого/Среднее'],
-          colors: ['rgba(196, 93, 105, 1.0)'],
-          bgColors: ['rgba(196, 93, 105, 0.0)']
+          colors: ['rgba(255, 166, 0, 1)'],
+          bgColors: [transparent]
         },
         {
           index: 3,
           name: 'Глубина просмотра',
           labels: ['Глубина просмотра - Итого/Среднее'],
-          colors: ['rgba(196, 93, 105, 1.0)'],
-          bgColors: ['rgba(196, 93, 105, 0.0)']
+          colors: ['rgba(255, 166, 0, 1)'],
+          bgColors: [transparent]
         },
         {
           index: 4,
           name: 'Заказы',
           labels: ['Заказы - Оплаченные', 'Заказы - Неоплаченные'],
-          colors: ['rgba(196, 93, 105, 1.0)', 'rgba(32, 162, 219, 1.0)'],
-          bgColors: ['rgba(196, 93, 105, 0.0)', 'rgba(32, 162, 219, 0.0)']
+          colors: ['rgba(0, 63, 92, 1)', 'rgba(255, 166, 0, 1)'],
+          bgColors: [transparent, transparent]
         },
         {
           index: 5,
           name: 'Суммы заказов',
           labels: ['Заказы - Сумма итого', 'Заказы - Сумма оплат'],
-          colors: ['rgba(196, 93, 105, 1.0)', 'rgba(32, 162, 219, 1.0)'],
-          bgColors: ['rgba(196, 93, 105, 0.0)', 'rgba(32, 162, 219, 0.0)']
+          colors: ['rgba(0, 63, 92, 1)', 'rgba(255, 166, 0, 1)'],
+          bgColors: [transparent, transparent]
         },
         {
           index: 6,
           name: 'Кол-во товара',
           labels: ['Заказы - Кол-во номенклатуры', 'Заказы - Кол-во позиций'],
-          colors: ['rgba(196, 93, 105, 1.0)', 'rgba(32, 162, 219, 1.0)'],
-          bgColors: ['rgba(196, 93, 105, 0.0)', 'rgba(32, 162, 219, 0.0)']
+          colors: ['rgba(0, 63, 92, 1)', 'rgba(255, 166, 0, 1)'],
+          bgColors: [transparent, transparent]
         }
       ];
       var tempDataCharts = [];
@@ -283,6 +288,7 @@ export default {
         });
       });
 
+      this.msg='';
     },
     onFileChange(e) {
       var files = e.target.files || e.dataTransfer.files;

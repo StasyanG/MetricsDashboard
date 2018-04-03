@@ -140,14 +140,21 @@ export default {
       var grouping = [
         {
           index: 0,
-          name: 'Посещаемость',
+          name: '[YM] Посещаемость',
           labels: ['Визиты - Новые посетители', 'Визиты - Вернувшиеся посетители'],
           colors: ['rgba(0, 63, 92, 1)', 'rgba(255, 166, 0, 1)'],
           bgColors: [transparent, transparent]
         },
         {
           index: 1,
-          name: 'Посещаемость (по источникам)',
+          name: '[LI] Посещаемость',
+          labels: ['[LI] Просмотры', '[LI] Посетители'],
+          colors: ['rgba(0, 63, 92, 1)', 'rgba(255, 166, 0, 1)'],
+          bgColors: [transparent, transparent]
+        },
+        {
+          index: 2,
+          name: '[YM] Посещаемость (по источникам)',
           labels: [
             'Визиты - Переходы по рекламе', 'Визиты - Переходы с сохранённых страниц',
             'Визиты - Переходы из социальных сетей', 'Визиты - Прямые заходы',
@@ -168,35 +175,35 @@ export default {
             ]
         },
         {
-          index: 2,
-          name: 'Время на сайте',
+          index: 3,
+          name: '[YM] Время на сайте',
           labels: ['Ср. время (сек) - Итого/Среднее'],
           colors: ['rgba(255, 166, 0, 1)'],
           bgColors: [transparent]
         },
         {
-          index: 3,
-          name: 'Глубина просмотра',
+          index: 4,
+          name: '[YM] Глубина просмотра',
           labels: ['Глубина просмотра - Итого/Среднее'],
           colors: ['rgba(255, 166, 0, 1)'],
           bgColors: [transparent]
         },
         {
-          index: 4,
+          index: 5,
           name: 'Заказы',
           labels: ['Заказы - Оплаченные', 'Заказы - Неоплаченные'],
           colors: ['rgba(0, 63, 92, 1)', 'rgba(255, 166, 0, 1)'],
           bgColors: [transparent, transparent]
         },
         {
-          index: 5,
+          index: 6,
           name: 'Суммы заказов',
           labels: ['Заказы - Сумма итого', 'Заказы - Сумма оплат'],
           colors: ['rgba(0, 63, 92, 1)', 'rgba(255, 166, 0, 1)'],
           bgColors: [transparent, transparent]
         },
         {
-          index: 6,
+          index: 7,
           name: 'Кол-во товара',
           labels: ['Заказы - Кол-во номенклатуры', 'Заказы - Кол-во позиций'],
           colors: ['rgba(0, 63, 92, 1)', 'rgba(255, 166, 0, 1)'],

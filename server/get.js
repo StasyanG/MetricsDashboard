@@ -7,6 +7,7 @@ var MetricsWeekModel = require('./models/metric_week').MetricsWeekModel;
 
 const helpers = require('./helpers');
 const YaMetrics = require('./classes/YaMetrics.js');
+const LiveInternet = require('./classes/LiveInternet.js');
 
 function get_counter_list() {
     return new Promise(function(resolve, reject) {
@@ -15,14 +16,14 @@ function get_counter_list() {
             if(err) {
                 reject(err);
             }
-            var cnts = contents.split('\n');
+            var cnts = contents.split('\r\n');
             cnts.forEach(function(cnt, i, cnts) {
                 if(!cnt.length) return;
                 var cntdata = cnt.split(' ');
                 var name = cntdata[0];
                 var type = cntdata[1];
-                var id = cntdata[2];
-                var token = cntdata[3];
+                var id = cntdata.length > 2 ? cntdata[2] : '';
+                var token = cntdata.length > 3 ? cntdata[3] : '';
                 counters.push({
                     name: name,
                     type: type,
@@ -78,6 +79,23 @@ function get_yandex(name, id, api_token, date1, date2, group, dataSets=null) {
 
 }
 
+function get_liveinternet(name) {
+
+    return new Promise(function(resolve, reject) {
+        var liveInternet = new LiveInternet(name);
+
+        liveInternet.get_metrics()
+        .then(function(counted) {
+            resolve(counted);
+        })
+        .catch(function(error) {
+            helpers.logger('get.get_liveinternet', 'ERROR occured!\n' + error);
+            reject(error);
+        });
+    });
+
+}
+
 module.exports = {
     get_counters: function(res) {
 
@@ -117,6 +135,14 @@ module.exports = {
                     return item.name == name && item.type == type;
                 });
             }
+            if(found.length == 0) {
+                res.send({
+                    status: 'ERROR',
+                    msg: 'Requested counter NOT FOUND'
+                });
+                return;
+            }
+
             var numOfCounters = found.length;
             var nCount = 0;
             found.forEach(function(cnt, i, counters) {
@@ -129,6 +155,27 @@ module.exports = {
                         nCount++;
                         helpers.logger('get.get_data', 'End processing of '
                             + cnt.name + ' ' + cnt.type + ' ' + cnt.id
+                            + ' (' + nCount + '/' + numOfCounters + ')');
+                        if(nCount == numOfCounters) {
+                            res.send({
+                                status: 'OK',
+                                data: 'Got Metrics data'
+                            });
+                        }
+                    })
+                    .catch(function(err) {
+                        res.send({
+                            status: 'ERROR',
+                            msg: err
+                        });
+                    });
+                } else if (cnt.type == 'LiveInternet') {
+                    console.log('asd');
+                    get_liveinternet(cnt.name)
+                    .then(function(counted) {
+                        nCount++;
+                        helpers.logger('get.get_data', 'End processing of '
+                            + cnt.name + ' ' + cnt.type
                             + ' (' + nCount + '/' + numOfCounters + ')');
                         if(nCount == numOfCounters) {
                             res.send({

@@ -1,3 +1,4 @@
+var http = require('http');
 var https = require('https');
 var moment = require('moment');
 
@@ -41,8 +42,9 @@ module.exports = {
         data.forEach(function(week, i, weeks) {
             var weekIndex = moment(week.timestamp).diff(date1, 'weeks');
 
-            var graphLabel = week['metric']+' - '+week['dimension']
-                           + (week['filters'] && week['filters'] != '' ? ' ('+weeks['filters']+')' : '');
+            var graphLabel = week['metric']
+                + (week['dimension'] && week['dimension'] != '' ? ' - ' + week['dimension'] : '')
+                + (week['filters'] && week['filters'] != '' ? ' ('+weeks['filters']+')' : '');
             var index = null;
             graphData.forEach(function(graph, k, data) {
                 if(graph.label == graphLabel) {
@@ -83,31 +85,43 @@ module.exports = {
     logger: function(context, msg) {
         console.log('[' + moment().format('YYYY-MM-DD hh:mm:ss') + '] ' + context + ' > ' + msg);
     },
-    send_request: function(host, path) {
+    send_request: function(host, path, protocol='https') {
         var thisObj = this;
         return new Promise(function(resolve, reject) {
             // Sends request and returns json response
-            https.request(host + path, function(res) {
-                thisObj.logger('helpers.send_request', res.statusCode + ' ' + host + path);
-                var chunks = [];
-                res.on('data', function(d) {
-                    thisObj.logger('helpers.send_request', 'Got chunk of data');
-                    chunks.push(d);
-                }).on('end', function() {
-                    var data = Buffer.concat(chunks);
-                    var result = JSON.parse(data);
-    
-                    thisObj.logger('helpers.send_request', 'Got full response');
-                    if(res.statusCode != 200) {
-                        reject('Status ' + result.code + ' | ' + result.message);
-                    }
-                    resolve(result);
-                }).on('error', function(e) {
+            if(protocol == 'https') {
+                https.request(host + path, function(res) {
+                    thisObj._procResponse(thisObj, res, host, path, resolve, reject);
+                })
+                .on('error', function(e) {
                     reject(e);
-                });;
-            }).on('error', function(e) {
-                reject(e);
-            }).end();
+                }).end();
+            } else {
+                http.request(host + path, function(res) {
+                    thisObj._procResponse(thisObj, res, host, path, resolve, reject);
+                })
+                .on('error', function(e) {
+                    reject(e);
+                }).end();
+            }
+        });
+    },
+    _procResponse: function(thisObj, res, host, path, resolve, reject) {
+        thisObj.logger('helpers.send_request', res.statusCode + ' ' + host + path);
+        var chunks = [];
+        res.on('data', function(d) {
+            thisObj.logger('helpers.send_request', 'Got chunk of data');
+            chunks.push(d);
+        }).on('end', function() {
+            var data = Buffer.concat(chunks);
+
+            thisObj.logger('helpers.send_request', 'Got full response');
+            if(res.statusCode != 200) {
+                reject('Status ' + res.statusCode);
+            }
+            resolve(data);
+        }).on('error', function(e) {
+            reject(e);
         });
     },
     splitArrayIntoChunks: function(arr, chunkSize) {

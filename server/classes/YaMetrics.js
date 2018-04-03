@@ -35,8 +35,13 @@ class YaMetrics {
 
       helpers.send_request(thisYaMetrics._api_host, req_url)
       .then(function(response) {
+        var result = JSON.parse(response);
+        if(result.code != 200) {
+          reject('Status ' + result.code + ' | ' + result.message);
+        }
+
         helpers.logger('YaMetrics.get_metrics', 'Response is good');
-        thisYaMetrics._data_raw = response;
+        thisYaMetrics._data_raw = result;
         thisYaMetrics._create_updates_for_week_objects(metrics, filters);
         return thisYaMetrics._update_week_objects();
       })

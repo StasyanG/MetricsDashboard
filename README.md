@@ -25,6 +25,10 @@ To be able to get data from Yandex.Metrika counters you should create a file ser
 ```
 <WEBSITE NAME> Yandex <COUNTER_ID> <API_TOKEN>
 ```
+For LiveInternet the line should look like this:
+```
+example.com LiveInternet
+```
 ### Installation and start
 To install and start server and web application use the following commands:
 ```

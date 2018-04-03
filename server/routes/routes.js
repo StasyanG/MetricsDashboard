@@ -30,9 +30,6 @@ module.exports = function (app) {
     app.get('/api/counters', function(req, res, next) {
         get.get_counters(res);
     });
-    app.get('/api/get', function(req, res, next) {
-        get.get_all(res);
-    });
     app.get('/api/get/:date1/:date2', function(req, res, next) {
         get.get_data(res, req.params.date1, req.params.date2);
     });

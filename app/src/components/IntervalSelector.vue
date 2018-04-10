@@ -44,7 +44,8 @@ export default {
 
 <style scoped>
 .intervalSelector {
-    padding: 14px 16px;
+    border: 1px solid #ccc;
+    padding: 14px 20px;
 }
 .intervalSelector__datepick {
     display: inline-block;

@@ -1,16 +1,35 @@
 <template>
   <div id="app">
-    <h1 class="site-title">Metrics Dashboard</h1>
-    <Navigation></Navigation>
-    <IntervalSelector v-on:intervalChange="handleIntervalChange" :interval="interval"></IntervalSelector>
-    <router-view :interval="interval" 
-                 :graphsLayout="graphsLayout" 
-                 v-on:graphsLayoutChange="handleGraphsLayoutChange"/>
+    <header class="header" v-if="isLoggedIn">
+      <div class="header__sitename">
+        Metrics Dashboard
+      </div>
+      <div class="header__menu">
+        <ul>
+          <router-link v-bind:to="{path: `/monitor`}" tag="li">
+            Мониторинг
+          </router-link>
+          <router-link v-bind:to="{path: `/admin`}" tag="li">
+            Администрирование
+          </router-link>
+          <router-link v-bind:to="{path: `/help`}" tag="li">
+            Поддержка
+          </router-link>
+        </ul>
+      </div>
+      <div class="header__user">
+        Имя Фамилия&nbsp;&nbsp;&nbsp;<a class="header__user__btnlogout" href="">Выйти</a>
+      </div>
+    </header>
+    <router-view 
+      :interval="interval" 
+      :graphsLayout="graphsLayout" 
+      :handleIntervalChange="handleIntervalChange"
+      :handleGraphsLayoutChange="handleGraphsLayoutChange"/>
   </div>
 </template>
 
 <script>
-import Navigation from './components/Navigation';
 import IntervalSelector from './components/IntervalSelector';
 
 import moment from 'moment';
@@ -18,7 +37,7 @@ moment.locale('ru');
 
 export default {
   name: 'App',
-  components: { Navigation, IntervalSelector },
+  components: { IntervalSelector },
   data() {
     return {
       interval: {
@@ -27,6 +46,11 @@ export default {
         granularity: 'days'
       },
       graphsLayout: '1'
+    }
+  },
+  computed: {
+    isLoggedIn: function() {
+      return window.localStorage.getItem('token') ? true : false;
     }
   },
   methods: {
@@ -41,15 +65,6 @@ export default {
 </script>
 
 <style>
+@import './assets/css/style.css';
 @import './assets/css/fontawesome-all.css';
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-.site-title {
-  text-align: center;
-}
 </style>

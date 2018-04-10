@@ -3,3 +3,4 @@ server/data
 */node_modules
 prod.*
 *.log
+dev/

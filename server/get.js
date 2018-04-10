@@ -120,6 +120,11 @@ module.exports = {
     },
     get_data: function(res, date1, date2, name=null, type=null, dataSets=null) {
 
+        const availableProviders = [
+            "Yandex",
+            "LiveInternet"
+        ];
+
         date1 = moment(date1).startOf("day");
         var date1Str = date1.format('YYYY-MM-DD');
         date2 = moment(date2).startOf("day");
@@ -130,9 +135,14 @@ module.exports = {
         get_counter_list()
         .then(function(counters) {
             var found = counters;
-            if(name && type) {
+            if(name) {
                 found = counters.filter(function(item) {
-                    return item.name == name && item.type == type;
+                    return item.name == name;
+                });
+            }
+            if(type) {
+                found = counters.filter(function(item) {
+                    return item.type == type;
                 });
             }
             if(found.length == 0) {

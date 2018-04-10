@@ -36,7 +36,7 @@ class YaMetrics {
       helpers.send_request(thisYaMetrics._api_host, req_url)
       .then(function(response) {
         var result = JSON.parse(response);
-        if(result.code != 200) {
+        if(result.data == null) {
           reject('Status ' + result.code + ' | ' + result.message);
         }
 

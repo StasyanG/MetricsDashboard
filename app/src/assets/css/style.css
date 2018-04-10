@@ -1,0 +1,192 @@
+html, body, #app {
+  height: 100%;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.header {
+  background-color: #4dd2ff;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  display: grid;
+  grid-template-columns: 300px 3fr 2fr;
+  grid-template-rows: 40px;
+  grid-template-areas: "sitename menu user";
+  height: 40px;
+  padding: 5px 0;
+  position: relative;
+  z-index: 99;
+}
+
+.header .header__sitename {
+  align-self: center;
+  grid-area: sitename;
+  font-size: 1.5em;
+  font-weight: 800;
+  justify-self: stretch;
+  text-align: center;
+}
+
+.header .header__menu {
+  grid-area: menu;
+  height: 100%;
+}
+
+.header .header__menu ul {
+  display: table;
+  height: inherit;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.header .header__menu ul li {
+  display: table-cell;
+  vertical-align: middle;
+  color: #000;
+  padding: 0 15px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.header .header__menu ul li:hover {
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.header .header__user {
+  align-self: center;
+  grid-area: user;
+  justify-self: stretch;
+  text-align: right;
+  padding: 10px;
+}
+
+.header .header__user .header__user__btnlogout {
+  font-size: 0.7em;
+}
+
+.monitor {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  grid-template-rows: 1fr;
+}
+
+.sidebar {
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  left: 0;
+  top: 0;
+  padding-top: 20px;
+  position: relative;
+  width: 300px;
+  z-index: 98;
+}
+
+.sidebar .sidebar__item {
+  font-size: 1.3em;
+  padding: 10px 10px;
+}
+
+.sidebar .sidebar__item:hover {
+  background-color: #f2f2f2;
+  cursor: pointer;
+}
+
+.main {
+  padding: 20px;
+}
+
+.breadcrumbs ul {
+  margin: 0;
+  padding: 10px 20px;
+  list-style: none;
+  /* Add a slash symbol (/) before/behind each list item */
+}
+
+.breadcrumbs ul li {
+  display: inline;
+  white-space: nowrap;
+}
+
+.breadcrumbs ul li a:visited {
+  color: #000;
+}
+
+.breadcrumbs ul li a:hover {
+  color: #ffb24d;
+  text-decoration: underline;
+}
+
+.breadcrumbs ul li + li:before {
+  padding: 10px;
+  content: "/\00a0";
+}
+
+main {
+  padding: 20px;
+}
+
+.loginScreen {
+  background-color: #4dd2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+.loginScreen .loginScreen__container .loginScreen__container__title {
+  font-size: 1.5em;
+  font-weight: 800;
+  text-align: center;
+  padding: 20px;
+}
+
+.loginScreen .loginScreen__container .loginScreen__container__form {
+  background-color: #fff;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  padding: 20px;
+  width: 400px;
+}
+
+form textarea, form input, form button {
+  outline: none;
+}
+
+form label, form input {
+  display: block;
+  padding: 10px;
+  width: calc(100% - 20px);
+}
+
+form label {
+  padding-left: 0;
+}
+
+form input, form button {
+  border: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+form input:hover, form input:focus, form button:hover {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+form button {
+  background-color: #fff;
+  cursor: pointer;
+  font-weight: 800;
+  margin: 30px 0 10px;
+  padding: 10px;
+  width: 100%;
+}
+
+form button:hover {
+  background-color: #ffb24d;
+}
+/*# sourceMappingURL=style.css.map */

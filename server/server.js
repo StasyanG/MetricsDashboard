@@ -5,7 +5,11 @@ var MONGO_CONN_STRING = process.env.MONGO_CONN_STRING || CONFIG.MONGO_CONNECTION
 
 var path = require('path')
 	, express = require('express')
-	, mongoose = require('mongoose');
+	, cookieParser = require('cookie-parser')
+	, bodyParser = require('body-parser')
+	, mongoose = require('mongoose')
+	, passport = require('passport')
+	, expressSession = require('express-session');
 
 mongoose.connect(CONFIG.MONGO_CONNECTION_STRING, {
 	autoReconnect: true,
@@ -46,12 +50,38 @@ mongoose.connection.on('reconnect', function (ref) {
 function startServer() {
 	var app = express();
 
+	app.set('views', path.join(__dirname, 'views'));
+	app.set('view engine', 'pug');
+
+  app.use(bodyParser.json());
+	app.use(bodyParser.urlencoded({ extended: false }));
+	app.use(cookieParser());
+
+	// For JSONWebToken
+	app.set('superSecret', CONFIG.SECRET || 'superSecret');
+
+	// Passport Initialization
+	app.use(expressSession({
+		secret: 'mySecretKey',
+		resave: true,
+		saveUninitialized: true
+	}));
+	app.use(passport.initialize());
+	app.use(passport.session());
+
+	// Initialize Passport
+	var initPassport = require('./libs/passport/init');
+	initPassport(passport);
+	
+	// Using the flash middleware provided by connect-flash to store messages in session
+	// and displaying in templates
+	var flash = require('connect-flash');
+	app.use(flash());
+
+	var routes = require('./routes/routes')(passport);
+	app.use('/', routes);
+
 	app.listen(CONFIG.PORT, CONFIG.HOST, function() {
 		console.log(`Running on http://${CONFIG.HOST}:${CONFIG.PORT}`);
 	});
-
-	require('./routes/routes')(app);
-
-	app.set('views', path.join(__dirname, 'views'));
-	app.set('view engine', 'pug');
 }

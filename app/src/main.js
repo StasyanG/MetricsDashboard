@@ -3,8 +3,13 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import middleware from './middleware'
+import interceptors from './interceptors';
 
 Vue.config.productionTip = false;
+
+middleware(router);
+interceptors(Vue);
 
 /* eslint-disable no-new */
 var vue = new Vue({

@@ -4,7 +4,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Resource from 'vue-resource'
-import LoginScreen from '@/components/LoginScreen.vue'
+import LoginScreen from '@/components/LoginScreen'
 import Monitor from '@/components/Monitor'
 import Admin from '@/components/Admin'
 import HelpCenter from '@/components/HelpCenter'
@@ -26,14 +26,7 @@ export default new Router({
       path: '/monitor',
       name: 'Monitor',
       component: Monitor,
-      meta: {
-        access: {
-          requiresLogin: true,
-          requiredPermissions: ['admin', 'editor', 'viewer'],
-          permissionType: 'AtLeastOne' // options: AtLeastOne, CombinationRequired
-        },
-        linkText: 'Мониторинг'
-      },
+      meta: { linkText: 'Мониторинг' },
       children: [
         {
           path: ':sitename',
@@ -47,27 +40,13 @@ export default new Router({
       path: '/admin',
       name: 'Admin',
       component: Admin,
-      meta: {
-        access: {
-          requiresLogin: true,
-          requiredPermissions: ['admin'],
-          permissionType: 'AtLeastOne' // options: AtLeastOne, CombinationRequired
-        },
-        linkText: 'Администрирование'
-      }
+      meta: { linkText: 'Администрирование' }
     },
     {
       path: '/help',
       name: 'HelpCenter',
       component: HelpCenter,
-      meta: {
-        access: {
-          requiresLogin: true,
-          requiredPermissions: ['admin', 'editor', 'viewer'],
-          permissionType: 'AtLeastOne' // options: AtLeastOne, CombinationRequired
-        },
-        linkText: 'Поддержка'
-      }
+      meta: { linkText: 'Поддержка' }
     }
   ]
 })

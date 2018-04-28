@@ -4,7 +4,6 @@ var router = express.Router();
 const moment = require('moment');
 const csv = require('fast-csv');
 var get = require('../get');
-var auth = require('../auth');
 var upload = require('../upload');
 var helpers = require('../helpers');
 var CSVOrders = require('../classes/CSVOrders')
@@ -15,23 +14,7 @@ var MetricsWeekModel = require('../models/metric_week').MetricsWeekModel;
 var CustomWeekModel = require('../models/custom_week').CustomWeekModel;
 var UserModel = require('../models/user').UserModel;
 
-var hasPermissionLevel = function(level) {
-    // Permission Levels
-    // -1 - Not Authenticated
-    // 0  - Authenticated / Viewer
-    // 1  - Editor
-    // 2  - Admin
-    return function (req, res, next) {
-        if(level == -1) {
-            return next();
-        } else if (req.isAuthenticated() && req.user.level >= level) {
-            return next();
-        }
-        res.sendStatus(401); // Unauthorized
-    }
-}
-
-module.exports = function (passport) {
+module.exports = function () {
     // CORS middleware
     // Source: https://gist.github.com/cuppster/2344435
     var allowCrossDomain = function(req, res, next) {
@@ -54,35 +37,7 @@ module.exports = function (passport) {
         res.render('index');
     });
 
-    router.post('/auth', function(req, res, next) {
-        auth.checkToken(req, res, next);
-    });
-    router.post('/auth/login', hasPermissionLevel(-1), passport.authenticate('login', {
-		successRedirect: '/auth/success',
-		failureRedirect: '/auth/fail',
-        failureFlash: true
-    }));
-    router.get('/auth/success', function(req, res, next) {
-        if(!req.user) {
-            res.sendStatus(401);
-        } else {
-            console.log('user: ' + JSON.stringify(req.session));
-            res.send({
-                'token': auth.getToken({name: req.user.username}),
-                'user': req.user
-            });
-        }
-    });
-    router.get('/auth/fail', function(req, res, next) {
-        res.sendStatus(401); // Unauthorized
-    });
-    router.post('/auth/logout', function(req, res, next) {
-        req.logout();
-        auth.logout(req.body.token);
-        res.sendStatus(200);
-    });
-
-    router.get('/api/*', hasPermissionLevel(0), function (req, res, next) {
+    router.get('/api/*', function (req, res, next) {
 		next();
 	});
     router.get('/api/counters', function(req, res, next) {

@@ -180,7 +180,6 @@ module.exports = {
                         });
                     });
                 } else if (cnt.type == 'LiveInternet') {
-                    console.log('asd');
                     get_liveinternet(cnt.name)
                     .then(function(counted) {
                         nCount++;
@@ -200,6 +199,18 @@ module.exports = {
                             msg: err
                         });
                     });
+                } else if (cnt.type == 'Google') {
+                    nCount++;
+                    helpers.logger('get.get_data', 'Skipped '
+                        + cnt.name + ' ' + cnt.type
+                        + ' (' + nCount + '/' + numOfCounters + ')');
+                    helpers.logger('get.get_data', 'GOOGLE ANALYTICS NOT IMPLEMENTED');
+                    if(nCount == numOfCounters) {
+                        res.send({
+                            status: 'OK',
+                            data: 'Got Metrics data'
+                        });
+                    }
                 }
             });
         })

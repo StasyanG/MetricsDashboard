@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <header class="header" v-if="isLoggedIn">
+    <header class="header">
       <div class="header__sitename">
         Metrics Dashboard
       </div>

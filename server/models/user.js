@@ -1,39 +1,14 @@
 var mongoose = require('mongoose');
-var crypto = require('crypto');
+var bcrypt = require('bcrypt');
 
 var Schema = mongoose.Schema;
 
 var User = new Schema({
   username: { type: String, unique: true, required: true },
-  hashedPassword: { type: String, required: true },
-  salt: { type: String, required: true },
+  password: { type: String, required: true },
   role: { type: String, required: true },
-  email: { type: String, required: true },
-  name: { type: String, required: true },
   lastActive: { type: Date }
 });
-
-User.methods.encryptPassword = function(password) {
-  return crypto.createHmac('sha1', this.salt).update(password).digest('hex');
-  // return crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512');
-};
-User.methods.generateSalt = function() {
-  return crypto.randomBytes(32).toString('base64');
-  // return crypto.randomBytes(128).toString('base64');
-}
-
-User.virtual('userId')
-  .get(function () {
-      return this._id;
-  });
-
-User.virtual('password')
-  .set(function(password) {
-      this._plainPassword = password;
-      this.salt = generateSalt();
-      this.hashedPassword = this.encryptPassword(password);
-  })
-  .get(function() { return this._plainPassword; });
 
 User.virtual('level')
   .get(function() {
@@ -42,8 +17,27 @@ User.virtual('level')
     if(role == 'viewer') return 0;
   });
 
-User.methods.checkPassword = function(password) {
-  return this.encryptPassword(password).toString() === this.hashedPassword;
+User.pre('save', function (next) {
+  const user = this;
+  if (this.isModified('password') || this.isNew) {
+    bcrypt.genSalt(10, (error, salt) => {
+    if (error) return next(error);
+    bcrypt.hash(user.password, salt, (error, hash) => {
+      if (error) return next(error);
+      user.password = hash;
+        next();
+      });
+    });
+  } else {
+    return next();
+  }
+});
+
+User.methods.comparePassword = function (password, callback) {
+  bcrypt.compare(password, this.password, (error, matches) => {
+    if (error) return callback(error);
+    callback(null, matches);
+  });
 };
 
 var UserModel = mongoose.model('User', User);

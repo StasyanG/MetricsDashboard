@@ -6,7 +6,10 @@ var MONGO_CONN_STRING = process.env.MONGO_CONN_STRING || CONFIG.MONGO_CONNECTION
 var path = require('path')
 	, express = require('express')
 	, bodyParser = require('body-parser')
-	, mongoose = require('mongoose');
+	, mongoose = require('mongoose')
+	, cors = require('cors')
+	, passport = require('passport')
+	, passportConfig = require('./libs/passport')(passport);
 
 mongoose.connect(CONFIG.MONGO_CONNECTION_STRING, {
 	autoReconnect: true,
@@ -18,7 +21,7 @@ mongoose.connect(CONFIG.MONGO_CONNECTION_STRING, {
 	startServer();
 })
 .catch(function(err) {
-	console.log('Could not establish MongoDB connection! ' + err);
+	console.log('Error occured! ' + err);
 });
 
 mongoose.connection.on('open', function (ref) {
@@ -52,11 +55,12 @@ function startServer() {
 
   app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({ extended: false }));
+	app.use(cors());
+	app.use(passport.initialize());
 
-	// For JSONWebToken
-	app.set('JWT_SECRET', CONFIG.SECRET || 'superSecret');
+	app.set('jwt_secret', CONFIG.SECRET);
 
-	var routes = require('./routes/routes')();
+	var routes = require('./routes/routes')(app, passport);
 	app.use('/', routes);
 
 	app.listen(CONFIG.PORT, CONFIG.HOST, function() {

@@ -12,30 +12,31 @@ var env = process.env.NODE_ENV || '';
 
 var MetricsWeekModel = require('../models/metric_week').MetricsWeekModel;
 var CustomWeekModel = require('../models/custom_week').CustomWeekModel;
-var UserModel = require('../models/user').UserModel;
+var User = require('../models/user').UserModel;
 
-module.exports = function () {
-    // CORS middleware
-    // Source: https://gist.github.com/cuppster/2344435
-    var allowCrossDomain = function(req, res, next) {
-        res.header('Access-Control-Allow-Origin', req.headers.origin);
-        res.header('Access-Control-Allow-Credentials', 'true');
-        res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-          
-        // intercept OPTIONS method
-        if (req.method == 'OPTIONS') {
-          res.sendStatus(200);
-        }
-        else {
-          next();
-        }
-    };
-    router.use(allowCrossDomain);
+const auth = require('./auth');
+
+module.exports = function (app, passport) {
 
     router.get('/', function (req, res, next) {
         res.render('index');
     });
+
+    router.post('/auth/login', auth.login(User));
+    router.post('/auth/signup', auth.signup(User));
+
+    // TODO: REMOVE AFTER DEVELOPMENT AND TESTING OF AUTHORIZATION
+    router.get('/auth/setup', auth.setup(User));
+    router.get('/auth/reset', function(req, res, next) {
+        User.remove({}, function() {
+            res.send('Removed all users');
+        });
+    });
+    router.get('/auth/listUsers',
+        passport.authenticate('jwt', { session: false }),
+        auth.listUsers(User, app.get('jwt_secret'))
+    );
+    // /TODO
 
     router.get('/api/*', function (req, res, next) {
 		next();
@@ -212,35 +213,6 @@ module.exports = function () {
 				return res.send({ error: 'Server error', desc: '[MetricsData] Unable to remove all' });
 			}
 		});
-    });
-    
-    // SETUP admin user
-    router.get('/setup', function(req, res, next) {
-        UserModel.count({}, function(err, c) {
-            if(c == 0) {
-                var admin = new UserModel({
-                    username: 'admin',
-                    role: 'admin',
-                    email: 'admin@example.com',
-                    name: 'Admin'
-                });
-                admin.salt = admin.generateSalt();
-                admin.hashedPassword = admin.encryptPassword('admin');
-                admin.save(function(err) {
-                    if(err) throw err;
-            
-                    console.log('Admin user created successfully');
-                    res.sendStatus(200);
-                });
-            } else {
-                res.sendStatus(200);
-            }
-        });
-    });
-    router.get('/reset', function(req, res, next) {
-        UserModel.remove({}, function() {
-            res.send('Removed all users');
-        });
     });
 
     router.use(function(req, res, next) {

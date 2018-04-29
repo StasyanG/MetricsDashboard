@@ -28,8 +28,13 @@ auth.login = (User) => (req, res) => {
 auth.verify = (headers) => {
   if (headers && headers.authorization) {
     const split = headers.authorization.split(' ');
-  if (split.length === 2) return split[1];
-    else return null;
+    if (split.length === 2) {
+      const token = split[1];
+      jwt.verify(token, CONFIG.SECRET, function(err, decoded) {
+        if (!err) return decoded;
+        else return null;
+      });
+    } else return null;
   } else return null;
 }
 
@@ -49,33 +54,46 @@ auth.signup = (User) => (req, res) => {
   }
 }
 
+auth.logout = function(req, res) {
+  req.logout();
+  res.json({ success: true, message: 'Logged out successfully' });
+}
+
 // TODO: REMOVE AFTER DEVELOPMENT AND TESTING OF AUTHORIZATION
+function genRandomString(len) {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  for (var i = 0; i < len; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+}
 // Create admin account
-auth.setup = (User) =>  (req, res) => {
-  const admin = new User({
-    username: 'admin',
-    password: 'admin',
-    role: 'admin'
-  });
-  admin.save(error => {
+auth.setup = (User) => (req, res) => {
+
+  User.findOne({}, (error, user) => {
     if (error) throw error;
-    console.log('Admin account was succesfully set up');
-    res.json({ success: true });
+
+    if (!user) {
+      const password = genRandomString(10);
+      const admin = new User({
+        username: 'admin',
+        password: password,
+        role: 'admin'
+      });
+      admin.save(error => {
+        if (error) throw error;
+        console.log('Admin account was succesfully set up');
+        res.json({ success: true, password: password });
+      });
+    }
+    else {
+      console.log('Setup has been done before');
+      res.json({ success: true });
+    }
   });
+
 }
-// List all users & test token authorization
-auth.listUsers = (User, Token) => (req, res) => {
-  const token = Token;
-  if (token) {
-    User.find({}, (error, users) => {
-      if (error) throw error;
-      res.status(200).json(users);
-    });
-  } 
-  else {
-    return res.status(403).send({ success: false, message: 'Unauthorized' });
-  }
-}
-// /TODO
 
 module.exports = auth;

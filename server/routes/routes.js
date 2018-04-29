@@ -24,21 +24,19 @@ module.exports = function (app, passport) {
 
     router.post('/auth/login', auth.login(User));
     router.post('/auth/signup', auth.signup(User));
+    router.post('/auth/logout', auth.logout);
 
     // TODO: REMOVE AFTER DEVELOPMENT AND TESTING OF AUTHORIZATION
     router.get('/auth/setup', auth.setup(User));
-    router.get('/auth/reset', function(req, res, next) {
-        User.remove({}, function() {
-            res.send('Removed all users');
-        });
-    });
-    router.get('/auth/listUsers',
-        passport.authenticate('jwt', { session: false }),
-        auth.listUsers(User, app.get('jwt_secret'))
-    );
+    // router.get('/auth/reset', function(req, res, next) {
+    //     User.remove({}, function() {
+    //         res.send('Removed all users');
+    //     });
+    // });
     // /TODO
 
-    router.get('/api/*', function (req, res, next) {
+    router.get('/api/*', passport.authenticate('jwt', { session: false }),
+    function (req, res, next) {
 		next();
 	});
     router.get('/api/counters', function(req, res, next) {

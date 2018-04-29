@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <header class="header">
+    <header class="header" v-if="user.authenticated">
       <div class="header__sitename">
         Metrics Dashboard
       </div>
@@ -18,19 +18,21 @@
         </ul>
       </div>
       <div class="header__user">
-        Имя Фамилия&nbsp;&nbsp;&nbsp;<a class="header__user__btnlogout" href="">Выйти</a>
+        <span v-if="user.info">{{ user.info.username }}</span>&nbsp;&nbsp;&nbsp;<a class="header__user__btnlogout" v-on:click="logout('/auth')">Выйти</a>
       </div>
     </header>
     <router-view 
       :interval="interval" 
       :graphsLayout="graphsLayout" 
       :handleIntervalChange="handleIntervalChange"
-      :handleGraphsLayoutChange="handleGraphsLayoutChange"/>
+      :handleGraphsLayoutChange="handleGraphsLayoutChange"
+      :user="user"/>
   </div>
 </template>
 
 <script>
 import IntervalSelector from './components/IntervalSelector';
+import Auth from '@/components/Authentication';
 
 import moment from 'moment';
 moment.locale('ru');
@@ -45,12 +47,8 @@ export default {
         date2: moment().format('YYYY-MM-DD'),
         granularity: 'days'
       },
-      graphsLayout: '1'
-    }
-  },
-  computed: {
-    isLoggedIn: function() {
-      return window.localStorage.getItem('token') ? true : false;
+      graphsLayout: '1',
+      user: Auth.user
     }
   },
   methods: {
@@ -59,6 +57,9 @@ export default {
     },
     handleGraphsLayoutChange: function(e) {
       this.graphsLayout = e;
+    },
+    logout: function(redirect) {
+      Auth.logout(this, redirect);
     }
   }
 }

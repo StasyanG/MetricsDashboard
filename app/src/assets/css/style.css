@@ -67,7 +67,9 @@ body {
 }
 
 .header .header__user .header__user__btnlogout {
+  cursor: pointer;
   font-size: 0.7em;
+  text-decoration: underline;
 }
 
 .monitor {
@@ -131,7 +133,7 @@ main {
   padding: 20px;
 }
 
-.loginScreen {
+.authScreen {
   background-color: #4dd2ff;
   display: flex;
   align-items: center;
@@ -140,14 +142,22 @@ main {
   width: 100%;
 }
 
-.loginScreen .loginScreen__container .loginScreen__container__title {
+.authScreen .authScreen__container .authScreen__container__title {
   font-size: 1.5em;
   font-weight: 800;
   text-align: center;
   padding: 20px;
 }
 
-.loginScreen .loginScreen__container .loginScreen__container__form {
+.authScreen .authScreen__container .authScreen__container__snackbar {
+  background-color: #ffe6e6;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  margin-bottom: 10px;
+  padding: 20px;
+  width: 400px;
+}
+
+.authScreen .authScreen__container .authScreen__container__form {
   background-color: #fff;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
   padding: 20px;

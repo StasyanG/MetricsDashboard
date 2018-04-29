@@ -20,7 +20,7 @@
 
 <script>
 import axios from 'axios';
-
+import Auth from '@/components/Authentication';
 import IntervalSelector from './IntervalSelector';
 
 export default {
@@ -34,7 +34,11 @@ export default {
   },
   mounted() {
     var list = this.websiteList;
-    axios.get(process.env.API_URL+"/api/counters")
+    axios.get(process.env.API_URL+"/api/counters", {
+      headers: {
+        'Authorization': Auth.getAuthenticationHeader(this)
+      }
+    })
     .then(response => {
       var respData = response.data.data;
       respData.forEach(function(item, i, respData) {

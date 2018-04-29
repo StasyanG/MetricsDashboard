@@ -51,6 +51,7 @@ import axios from 'axios';
 import moment from 'moment';
 moment.locale('ru');
 
+import Auth from '@/components/Authentication';
 import Graph from './Graph';
 
 export default {
@@ -107,7 +108,11 @@ export default {
         +'/'+moment(this.interval.date1).format('YYYY-MM-DD')
         +'/'+moment(this.interval.date2).format('YYYY-MM-DD')
         +'/'+this.$route.params.sitename
-      )
+      , {
+        headers: {
+          'Authorization': Auth.getAuthenticationHeader(this)
+        }
+      })
       .then(response => {
         this.msg = '';
         this.getData();
@@ -123,7 +128,11 @@ export default {
         +"&date1="+moment(this.interval.date1).format('YYYY-MM-DD')
         +'&date2='+moment(this.interval.date2).format('YYYY-MM-DD')
         +'&gran='+this.interval.granularity
-      )
+      , {
+        headers: {
+          'Authorization': Auth.getAuthenticationHeader(this)
+        }
+      })
       .then(response => {
         this.msg = '';
         var resData = response.data.data;

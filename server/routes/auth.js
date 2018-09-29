@@ -1,16 +1,17 @@
 // Thanks to
 // https://habr.com/company/ruvds/blog/340750/
 
-const mongoose = require('mongoose')
-      , jwt = require('jsonwebtoken')
-      , CONFIG = process.env.NODE_ENV == 'prod' ? require('../config/prod') : require('../config/dev');
+const jwt = require('jsonwebtoken')
+const request = require('request')
+const CONFIG = process.env.NODE_ENV == 'prod' ? require('../config/prod') : require('../config/dev')
+const User = require('../models/user')
+const dbAccounts = require('../db/accounts')
 
 const auth = {};
 
-auth.login = (User) => (req, res) => {
+auth.login = (req, res) => {
   User.findOne({ username: req.body.username }, (error, user) => {
     if (error) throw error;
-
     if (!user) res.status(401).send({ success: false, message: 'Authentication failed. User not found.' });
     else {
       user.comparePassword(req.body.password, (error, matches) => {
@@ -38,7 +39,7 @@ auth.verify = (headers) => {
   } else return null;
 }
 
-auth.signup = (User) => (req, res) => {
+auth.signup = (req, res) => {
   if (!req.body.username || !req.body.password) {
     res.json({ success: false, message: 'Please, pass a username and password.' });
   } else {
@@ -49,7 +50,8 @@ auth.signup = (User) => (req, res) => {
     });
     newUser.save((error) => {
       if (error) return res.status(400).json({ success: false, message:  'Username already exists.' });
-      res.json({ success: true, message: 'Account created successfully' });
+      const token = jwt.sign({ user: newUser }, CONFIG.SECRET);
+      res.json({ success: true, message: 'Account created successfully', token });
     })
   }
 }
@@ -70,7 +72,7 @@ function genRandomString(len) {
   return text;
 }
 // Create admin account
-auth.setup = (User) => (req, res) => {
+auth.setup = (req, res) => {
 
   User.findOne({}, (error, user) => {
     if (error) throw error;
@@ -94,6 +96,46 @@ auth.setup = (User) => (req, res) => {
     }
   });
 
+}
+
+auth.yandex_oauthRequest = (req, res) => {
+  const uri = `https://oauth.yandex.ru/authorize?response_type=code&client_id=${CONFIG.YANDEX_APPID}`;
+  res.redirect(uri);
+}
+
+auth.yandex_autorize = (req, res, next) => {
+  if(!req.body.code || !req.body.accountId) {
+    return res.json({ success: false, message: 'Provide code and accountId' });
+  }
+
+  const uri = `https://oauth.yandex.ru/token`;
+  const data = {
+    grant_type: 'authorization_code',
+    code: req.body.code,
+    client_id: CONFIG.YANDEX_APPID,
+    client_secret: CONFIG.YANDEX_SECRET
+  }
+
+  request.post(uri, {form: data}, (err, _, body) => {
+    const data = JSON.parse(body);
+    if (err || data.error) {
+      return next(err || new Error(data.error_description));
+    }
+    dbAccounts.updateAccount(req.body.accountId, {
+      oauthAccessToken: data.access_token,
+      oauthRefreshToken: data.refresh_token
+    })
+      .then(updatedAccount => {
+        res.send({
+          status: 'OK',
+          data: {
+            message: 'Account authenticated',
+            account: updatedAccount
+          }
+        });
+      })
+      .catch(err => next(err));
+  });
 }
 
 module.exports = auth;

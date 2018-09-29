@@ -3,7 +3,9 @@ var https = require('https');
 var moment = require('moment');
 moment.locale('ru');
 
-var MetricsWeekModel = require('./models/metric_week').MetricsWeekModel;
+var DataWeekModel = require('./models/data_week');
+const dbMetrics = require('./db/metrics');
+const dbAccounts = require('./db/accounts');
 
 const helpers = require('./helpers');
 const YaMetrics = require('./classes/YaMetrics.js');
@@ -36,10 +38,10 @@ function get_counter_list() {
     });
 }
 
-function get_yandex(name, id, api_token, date1, date2, group, dataSets=null) {
+function get_yandex(metricsId, id, api_token, date1, date2, group, dataSets=null) {
     
     return new Promise(function(resolve, reject) {
-        var yaMetrics = new YaMetrics(id, name, api_token);
+        var yaMetrics = new YaMetrics(metricsId, id, api_token);
         var dataCounter = 0;
 
         var toGet = [
@@ -56,7 +58,7 @@ function get_yandex(name, id, api_token, date1, date2, group, dataSets=null) {
         var promises = [];
 
         toGet.reduce(function(promise, dataset) {
-            return promise.then(function(result) {
+            return promise.then(function() {
                 return Promise.all([
                     yaMetrics.get_metrics(date1, date2, group, 
                         dataset.metrics, dataset.dimensions)
@@ -118,13 +120,7 @@ module.exports = {
         });
 
     },
-    get_data: function(res, date1, date2, name=null, type=null, dataSets=null) {
-
-        const availableProviders = [
-            "Yandex",
-            "LiveInternet"
-        ];
-
+    get_data: async function(res, date1, date2, id=null, dataSets=null) {
         date1 = moment(date1).startOf("day");
         var date1Str = date1.format('YYYY-MM-DD');
         date2 = moment(date2).startOf("day");
@@ -132,40 +128,50 @@ module.exports = {
 
         helpers.logger('get.get_data', date1Str + ' ' + date2Str);
 
-        get_counter_list()
-        .then(function(counters) {
-            var found = counters;
-            if(name) {
-                found = counters.filter(function(item) {
-                    return item.name == name;
-                });
-            }
-            if(type) {
-                found = counters.filter(function(item) {
-                    return item.type == type;
-                });
-            }
-            if(found.length == 0) {
-                res.send({
-                    status: 'ERROR',
-                    msg: 'Requested counter NOT FOUND'
-                });
-                return;
+        try {
+            let allMetrics = await dbMetrics.getAllMetrics();
+            // @TODO:
+            // Need to filter metrics so that the same provider accounts
+            // don't get updated multiple times
+
+            if (id != null) {
+                allMetrics = allMetrics.filter(metrics => metrics._id == id);
             }
 
-            var numOfCounters = found.length;
-            var nCount = 0;
-            found.forEach(function(cnt, i, counters) {
-                helpers.logger('get.get_data', 'Start processing of '
-                    + cnt.name + ' ' + cnt.type + ' ' + cnt.id);
+            const nMetrics = allMetrics.length;
+            let nCount = 0;
+            allMetrics.forEach(async metrics => {
+                const account = await dbAccounts.getAccount(metrics.accountId);
+
+                helpers.logger('get.get_data',
+                `Owner: ${account.owner}`
+                + ` | Account: ${account.username} (${account.provider})`
+                + ` | Metrics: ${metrics.name} (${metrics.id})`);
                 
-                if(cnt.type == 'Yandex') {
-                    get_yandex(cnt.name, cnt.id, cnt.token, date1Str, date2Str, 'day', dataSets)
-                    .then(function(counted) {
+                if(account.provider == 'Yandex') {
+                    get_yandex(metrics._id.toString(), metrics.id,
+                        account.oauthAccessToken, date1Str, date2Str, 'day', dataSets)
+                    .then(function() {
                         nCount++;
-                        helpers.logger('get.get_data', 'End processing of '
-                            + cnt.name + ' ' + cnt.type + ' ' + cnt.id
-                            + ' (' + nCount + '/' + numOfCounters + ')');
+                        helpers.logger('get.get_data', `${nCount}/${nMetrics}`);
+                        if(nCount == nMetrics) {
+                            res.send({
+                                status: 'OK',
+                                data: 'Got Metrics data'
+                            });
+                        }
+                    })
+                    .catch(function(err) {
+                        res.send({
+                        status: 'ERROR',
+                        msg: err
+                        });
+                    });
+                } else if (account.provider == 'LiveInternet') {
+                    get_liveinternet(metrics.id.toString())
+                    .then(function() {
+                        nCount++;
+                        helpers.logger('get.get_data', `${nCount}/${nMetrics}`);
                         if(nCount == numOfCounters) {
                             res.send({
                                 status: 'OK',
@@ -179,48 +185,24 @@ module.exports = {
                             msg: err
                         });
                     });
-                } else if (cnt.type == 'LiveInternet') {
-                    get_liveinternet(cnt.name)
-                    .then(function(counted) {
-                        nCount++;
-                        helpers.logger('get.get_data', 'End processing of '
-                            + cnt.name + ' ' + cnt.type
-                            + ' (' + nCount + '/' + numOfCounters + ')');
-                        if(nCount == numOfCounters) {
-                            res.send({
-                                status: 'OK',
-                                data: 'Got Metrics data'
-                            });
-                        }
-                    })
-                    .catch(function(err) {
-                        res.send({
-                            status: 'ERROR',
-                            msg: err
-                        });
-                    });
-                } else if (cnt.type == 'Google') {
-                    nCount++;
-                    helpers.logger('get.get_data', 'Skipped '
-                        + cnt.name + ' ' + cnt.type
-                        + ' (' + nCount + '/' + numOfCounters + ')');
+                } else if (account.provider == 'Google') {
+                    helpers.logger('get.get_data', 'Skipped');
                     helpers.logger('get.get_data', 'GOOGLE ANALYTICS NOT IMPLEMENTED');
-                    if(nCount == numOfCounters) {
+                    nCount++;
+                    helpers.logger('get.get_data', `${nCount}/${nMetrics}`);
+                    if(nCount == nMetrics) {
                         res.send({
                             status: 'OK',
                             data: 'Got Metrics data'
                         });
                     }
                 }
-            });
-        })
-        .catch(function(err) {
-            console.error(err);
+            })
+        } catch(e) {
             res.send({
                 status: 'ERROR',
-                msg: err
+                msg: 'Cannot get data (requested metrics not found)'
             });
-        });
-
+        }
     }
 }

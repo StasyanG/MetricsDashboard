@@ -1,17 +1,19 @@
 'use strict';
 
-var CONFIG = process.env.NODE_ENV == 'prod' ? require('./config/prod') : require('./config/dev');
-var MONGO_CONN_STRING = process.env.MONGO_CONN_STRING || CONFIG.MONGO_CONNECTION_STRING;
+const CONFIG = process.env.NODE_ENV == 'prod' ? require('./config/prod') : require('./config/dev');
+const MONGO_CONN_STRING = process.env.MONGO_CONN_STRING || CONFIG.MONGO_CONNECTION_STRING;
 
-var path = require('path')
-	, express = require('express')
-	, bodyParser = require('body-parser')
-	, mongoose = require('mongoose')
-	, cors = require('cors')
-	, passport = require('passport')
-	, passportConfig = require('./libs/passport')(passport);
+const path = require('path')
+const express = require('express')
+const bodyParser = require('body-parser')
+const cors = require('cors')
 
-mongoose.connect(CONFIG.MONGO_CONNECTION_STRING, {
+const passport = require('passport')
+const passportConfig = require('./libs/passport')(passport)
+
+const db = require('./db');
+
+db.connect(CONFIG.MONGO_CONNECTION_STRING, {
 	autoReconnect: true,
 	reconnectInterval: 1000,
 	reconnectTries: 5,
@@ -24,31 +26,8 @@ mongoose.connect(CONFIG.MONGO_CONNECTION_STRING, {
 	console.log('Error occured! ' + err);
 });
 
-mongoose.connection.on('open', function (ref) {
-	console.log('Opened connection to MongoDB');
-});
-mongoose.connection.on('connected', function (ref) {
-	console.log('Connected to MongoDB');
-});
-
-mongoose.connection.on('disconnected', function (ref) {
-	console.log('Disconnected from MongoDB');
-});
-
-mongoose.connection.on('close', function (ref) {
-	console.log('Closed connection to MongoDB');
-});
-
-mongoose.connection.on('error', function (err) {
-	console.log('Error in connection to MongoDB!');
-});
-
-mongoose.connection.on('reconnect', function (ref) {
-	console.log('Reconnect to MongoDB');
-});
-
 function startServer() {
-	var app = express();
+	const app = express();
 
 	app.set('views', path.join(__dirname, 'views'));
 	app.set('view engine', 'pug');
@@ -56,12 +35,19 @@ function startServer() {
   app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({ extended: false }));
 	app.use(cors());
-	app.use(passport.initialize());
 
 	app.set('jwt_secret', CONFIG.SECRET);
 
-	var routes = require('./routes/routes')(app, passport);
+	const routes = require('./routes')(passport);
 	app.use('/', routes);
+
+	app.use(function(error, req, res, next) {
+		console.error(error);
+		return res.status(500).send({
+			status: 'ERROR',
+			msg: error.message
+		})
+	})
 
 	app.listen(CONFIG.PORT, CONFIG.HOST, function() {
 		console.log(`Running on http://${CONFIG.HOST}:${CONFIG.PORT}`);

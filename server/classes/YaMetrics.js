@@ -2,12 +2,12 @@ var moment = require('moment');
 moment.locale('ru');
 
 const helpers = require('../helpers');
-const MetricsWeekModel = require('../models/metric_week').MetricsWeekModel;
+const DataWeekModel = require('../models/data_week');
 
 class YaMetrics {
-  constructor(cid, cname, api_token) {
+  constructor(metricsId, cid, api_token) {
+    this.metricsId = metricsId;
     this.id = cid;
-    this.name = cname;
     this.api_token = api_token;
 
     this._data_raw = null;
@@ -28,7 +28,7 @@ class YaMetrics {
     var thisYaMetrics = this;
     return new Promise(function(resolve, reject) {
 
-      helpers.logger('YaMetrics.get_metrics', thisYaMetrics.id + ' ' + thisYaMetrics.name + ' @ ' + date1 + ' ' + date2);
+      helpers.logger('YaMetrics.get_metrics', thisYaMetrics.id + ' @ ' + date1 + ' ' + date2);
       helpers.logger('YaMetrics.get_metrics', group + ' ' + metrics + ' ' + dimensions + ' ' + filters);
 
       var req_url = thisYaMetrics._create_request_url(date1, date2, group, metrics, dimensions, filters);
@@ -85,16 +85,14 @@ class YaMetrics {
 
             var week = {
               timestamp: week1start.add(j, 'weeks').toDate(),
-              type: 'Yandex',
-              name: this.name,
+              id: this.metricsId,
               metric: params.metrics_dict[metric],
               dimension: dat['dimensions'].length > 0 ? dat['dimensions'][m]['name'] : 'Итого/Среднее',
               filters: filters
             };
             var exists = weekObjects.filter(function(obj) {
               return obj.timestamp.getTime() == week.timestamp.getTime()
-                  && obj.type == week.type
-                  && obj.name == week.name
+                  && obj.metricsId == week.metricsId
                   && obj.metric == week.metric
                   && obj.dimension == week.dimension
                   && obj.filters == week.filters;
@@ -128,8 +126,7 @@ class YaMetrics {
           metrics.forEach(function(metric, m, metrics) {
             var week = {
               timestamp: week1start.add(t, 'weeks').toDate(),
-              type: 'Yandex',
-              name: thisYaMetrics.name,
+              id: thisYaMetrics.metricsId,
               metric: thisYaMetrics._metrics_dict[metric],
               dimension: dat['dimensions'].length > 0 ? dat['dimensions'][m]['name'] : 'Итого/Среднее',
               filters: filters
@@ -161,7 +158,7 @@ class YaMetrics {
                      'Need to update ' + thisYaMetrics._data_to_store.length + ' week objects');
 
 
-      MetricsWeekModel.bulkFindUpdate(thisYaMetrics._data_to_store, function(err, results) {
+      DataWeekModel.bulkFindUpdate(thisYaMetrics._data_to_store, function(err, results) {
         if(err) {
           helpers.logger('YaMetrics._update_week_objects', 'Error occured: ' + err);
           reject(err);

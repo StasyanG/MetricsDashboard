@@ -6,7 +6,7 @@ var DayModel = require('./day').DayModel;
 
 var CustomWeek = new Schema({
     timestamp: {type: Date, required: true},
-    name: { type: String, required: true },
+    id: { type: String, required: true },
     metric: { type: String, required: true },
     dimension: { type: String, required: true },
     values: [DayModel.schema],
@@ -58,4 +58,4 @@ CustomWeek.statics.bulkFindUpdate = function(queries, fn) {
 
 var CustomWeekModel = mongoose.model('CustomWeek', CustomWeek);
 
-module.exports.CustomWeekModel = CustomWeekModel;
+module.exports = CustomWeekModel;

@@ -81,7 +81,7 @@ export default {
     }
   },
   watch: {
-    '$route.params.sitename': function (sitename) {
+    '$route.params.id': function (id) {
       this.getData();
     },
     interval: {
@@ -103,42 +103,32 @@ export default {
   methods: {
     requestData: function() {
       this.msg = 'Запрашиваю данные...';
-      axios.get(
+      Auth.request(this, 'get',
         process.env.API_URL+"/api/get"
-        +'/'+moment(this.interval.date1).format('YYYY-MM-DD')
-        +'/'+moment(this.interval.date2).format('YYYY-MM-DD')
-        +'/'+this.$route.params.sitename
-      , {
-        headers: {
-          'Authorization': Auth.getAuthenticationHeader(this)
-        }
-      })
-      .then(response => {
-        this.msg = '';
-        this.getData();
-      })
-      .catch(err => {console.log(err)})
+          +'/'+moment(this.interval.date1).format('YYYY-MM-DD')
+          +'/'+moment(this.interval.date2).format('YYYY-MM-DD')
+          +'/'+this.$route.params.id)
+        .then(response => {
+          this.msg = '';
+          this.getData();
+        })
+        .catch(err => {console.log(err)})
     },
     getData: function() {
       this.msg = 'Загружаю данные...';
       this.dataCharts = [];
       var dataCh = this.dataCharts;
-      axios.get(
-        process.env.API_URL+"/api/data?name="+this.$route.params.sitename
-        +"&date1="+moment(this.interval.date1).format('YYYY-MM-DD')
-        +'&date2='+moment(this.interval.date2).format('YYYY-MM-DD')
-        +'&gran='+this.interval.granularity
-      , {
-        headers: {
-          'Authorization': Auth.getAuthenticationHeader(this)
-        }
-      })
-      .then(response => {
-        this.msg = '';
-        var resData = response.data.data;
-        this.processChartsData(resData);
-      })
-      .catch(err => {console.log(err)})
+      Auth.request(this, 'get',
+        process.env.API_URL+"/api/data?id="+this.$route.params.id
+          +"&date1="+moment(this.interval.date1).format('YYYY-MM-DD')
+          +'&date2='+moment(this.interval.date2).format('YYYY-MM-DD')
+          +'&gran='+this.interval.granularity)
+        .then(response => {
+          this.msg = '';
+          var resData = response.data;
+          this.processChartsData(resData);
+        })
+        .catch(err => {console.log(err)})
     },
     processChartsData: function(data) {
       this.msg = 'Загружаю графики...';

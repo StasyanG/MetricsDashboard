@@ -91,7 +91,7 @@ body {
 
 .sidebar .sidebar__item {
   font-size: 1.3em;
-  padding: 10px 10px;
+  padding: 10px;
 }
 
 .sidebar .sidebar__item:hover {
@@ -164,21 +164,32 @@ main {
   width: 400px;
 }
 
+.authScreen .authScreen__container .authScreen__container__footer {
+  padding: 20px;
+  text-align: right;
+}
+.authScreen .authScreen__container .authScreen__container__footer > a {
+  cursor: pointer;
+}
+
 form textarea, form input, form button {
   outline: none;
 }
 
-form label, form input {
+form label, form input, form select {
   display: block;
   padding: 10px;
   width: calc(100% - 20px);
+}
+form select {
+  width: 100%;
 }
 
 form label {
   padding-left: 0;
 }
 
-form input, form button {
+form input, form button, form select {
   border: 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 }
@@ -200,3 +211,59 @@ form button:hover {
   background-color: #ffb24d;
 }
 /*# sourceMappingURL=style.css.map */
+
+.dialogOverlay {
+  background-color: rgba(0,0,0,0.5);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  padding-top: 100px;
+  z-index: 999;
+}
+
+.dialogOverlay > .dialog {
+  background-color: white;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  position: relative;
+  width: 100%;
+}
+
+.dialogOverlay > .dialog > .close {
+  background-color: grey;
+  border: 1px solid black;
+  color: red;
+  cursor: pointer;
+  position: absolute;
+  text-align: center;
+  top: 5px;
+  right: 5px;
+  height: 21px;
+  width: 21px;
+}
+
+.adminView {
+  padding: 10px;
+}
+
+table.accountList {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  margin-top: 20px;
+}
+
+table.accountList td, table.accountList th {
+  padding: 10px 15px;
+}
+
+.btn {
+  border: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  cursor: pointer;
+  padding: 10px 15px;
+}
+.btn:hover {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}

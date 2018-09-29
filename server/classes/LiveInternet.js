@@ -2,7 +2,7 @@ var moment = require('moment');
 moment.locale('ru');
 
 const helpers = require('../helpers');
-const MetricsWeekModel = require('../models/metric_week').MetricsWeekModel;
+const DataWeekModel = require('../models/data_week');
 
 class LiveInternet {
   constructor(cname) {
@@ -94,7 +94,7 @@ class LiveInternet {
                      'Need to update ' + thisLiveInternet._data_to_store.length + ' week objects');
 
 
-      MetricsWeekModel.bulkFindUpdate(thisLiveInternet._data_to_store, function(err, results) {
+      DataWeekModel.bulkFindUpdate(thisLiveInternet._data_to_store, function(err, results) {
         if(err) {
           helpers.logger('LiveInternet._update_week_objects', 'Error occured: ' + err);
           reject(err);

@@ -33,6 +33,7 @@ export default {
           context.$cookie.set('token', token, '1D'); // expires in 1D (1 day)
           context.validSignUp = true;
           this.user.authenticated = true;
+          this.user.info = this.getUserInfo(token);
           
           if (redirect) router.push(redirect);
         }).catch(({response: {data}}) => {
@@ -57,7 +58,6 @@ export default {
   },
 
   getUserInfo(token) {
-    console.log('Token: ' + token);
     return token ? jwt_decode(token).user : null;
   },
 
@@ -73,5 +73,24 @@ export default {
         }).catch((error) => {
           console.log('Error /auth/logout! ' + error);
         })
+  },
+
+  request(context, method, url, data) {
+    return new Promise((resolve, reject) => {
+      axios({
+        method,
+        url,
+        data,
+        headers: {
+          'Authorization': this.getAuthenticationHeader(context)
+        }
+      })
+        .then((response) => {
+          resolve(response.data);
+        })
+        .catch((error) => {
+          reject(error);
+        })
+    })
   }
 }

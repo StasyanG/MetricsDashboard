@@ -4,10 +4,9 @@ var Schema = mongoose.Schema;
 
 var DayModel = require('./day').DayModel;
 
-var MetricsWeek = new Schema({
+var DataWeek = new Schema({
     timestamp: {type: Date, required: true},
-    type: { type: String, required: true },
-    name: { type: String, required: true },
+    id: { type: String, required: true },
     metric: { type: String, required: true },
     dimension: { type: String, required: true },
     filters: { type: String, default: '' },
@@ -18,17 +17,16 @@ var MetricsWeek = new Schema({
 
 // Creating unique index
 // 1 is for Ascending
-MetricsWeek.index({ 
+DataWeek.index({ 
     timestamp: 1,
-    type: 1,
-    name: 1,
+    id: 1,
     metric: 1,
     dimension: 1,
     filters: 1
 }, { unique: true });
 
 /* Thanks to https://gist.github.com/dbrugne/2a62d4dd88f11fa36b75 */
-MetricsWeek.statics.bulkInsert = function(models, fn) {
+DataWeek.statics.bulkInsert = function(models, fn) {
     if (!models || !models.length)
         return fn(null);
 
@@ -45,7 +43,7 @@ MetricsWeek.statics.bulkInsert = function(models, fn) {
     bulk.execute(fn);
 };
 
-MetricsWeek.statics.bulkFindUpdate = function(queries, fn) {
+DataWeek.statics.bulkFindUpdate = function(queries, fn) {
     if(!queries || !queries.length)
         return fn(null);
     
@@ -60,6 +58,6 @@ MetricsWeek.statics.bulkFindUpdate = function(queries, fn) {
     bulk.execute(fn);
 }
 
-var MetricsWeekModel = mongoose.model('MetricsWeek', MetricsWeek);
+var DataWeekModel = mongoose.model('DataWeek', DataWeek);
 
-module.exports.MetricsWeekModel = MetricsWeekModel;
+module.exports = DataWeekModel;

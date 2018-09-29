@@ -24,8 +24,12 @@
           <input v-model="newUser.username" type="text" placeholder="Логин"/>
           <label>Пароль</label>
           <input v-model="newUser.password" type="password" placeholder="Пароль"/>
-          <button type="submit" value="Войти">Зарегистрироваться</button>
+          <button type="submit" value="Зарегистрироваться">Зарегистрироваться</button>
         </form>
+      </div>
+      <div class="authScreen__container__footer">
+        <a href="#" v-if="!signUpVisible" v-on:click="toggleView">Зарегистрироваться</a>
+        <a href="#" v-if="signUpVisible" v-on:click="toggleView">Войти</a>
       </div>
     </div>
   </div>
@@ -63,6 +67,10 @@ export default {
 
     submitSignUp () {
       Authentication.signup(this, this.newUser, '/')
+    },
+
+    toggleView() {
+      this.signUpVisible = !this.signUpVisible
     }
   }
 }

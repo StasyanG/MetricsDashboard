@@ -9,7 +9,7 @@ import AuthScreen from '@/components/Authentication/AuthScreen'
 import Monitor from '@/components/Monitor'
 import Admin from '@/components/Admin'
 import HelpCenter from '@/components/HelpCenter'
-import WebsiteView from '@/components/WebsiteView'
+import MetricsView from '@/components/MetricsView'
 
 Vue.use(Router)
 Vue.use(Resource)
@@ -33,11 +33,11 @@ const router = new Router({
       },
       children: [
         {
-          path: ':sitename',
-          name: 'WebsiteView',
-          component: WebsiteView,
+          path: ':id',
+          name: 'MetricsView',
+          component: MetricsView,
           meta: {
-            linkText: 'Показатели сайта',
+            linkText: 'Показатели счетчика',
             requiredAuth: true
           }
         }

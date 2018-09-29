@@ -3,8 +3,8 @@
 import Vue from 'vue'
 import VueCookie from 'vue-cookie'
 
-import App from './App'
-import router from './router'
+import App from '@/App'
+import router from '@/router'
 import Auth from '@/components/Authentication'
 
 Vue.use(VueCookie)

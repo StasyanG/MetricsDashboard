@@ -27,7 +27,7 @@ export default {
     }
   },
   mounted() {
-    axios.get(process.env.API_URL+"/api/counters")
+    axios.get(process.env.API_URL+"/api/metrics")
     .then(response => {this.results = response.data.data})
     .catch(err => {console.log(err)})
   }

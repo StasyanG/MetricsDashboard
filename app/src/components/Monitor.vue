@@ -153,7 +153,10 @@ export default {
         });
 
         this.dialog.selectedCounter = null;
-        this.dialog.counters.splice(index, 1);
+        this.dialog.counters[index] = {
+          ...this.dialog.counters[index],
+          _disabled: true
+        }
         this.closeDialog();
       } catch (err) {
         console.log(err);

@@ -1,6 +1,6 @@
 # MetricsDashboard
 
-__WARNING!__ This README is outdated.
+__WARNING!__ This README is outdated. And the project won't receive any updates in the future.
 
 ## Description
 A system to monitor websites' effectiveness
